@@ -39,3 +39,52 @@ a:hover{
     font-weight: bold;
     background-color: var(--hit-color);
 }
+
+.board{
+    display: flex;
+    flex-wrap: wrap;
+    width: min(520px, 50vw);
+    border: 2px solid var(--text-color)
+}
+
+.board-container{
+    display: flex;
+    flex-direction: row;
+    gap: 2em;
+}
+
+.cell {
+  width: calc(100% / 13);    
+  aspect-ratio: 1 / 1;       
+  box-sizing: border-box;
+  border: 1px solid white;
+  background-color: var(--water-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 12px system-ui;
+  user-select: none;
+  color: black;
+}
+
+.cell:hover {
+  background-color: var(--targeting-color);
+  cursor: crosshair;
+}
+
+#border{
+    background-color: var(--ship-color);
+    cursor: auto;
+}
+
+.ship{
+    background-color: darkslategrey;
+}
+
+#hit{
+   background-color: var(--hit-color);
+}
+
+#miss{
+    background-color: black;
+}
