@@ -81,10 +81,14 @@ a:hover{
     background-color: darkslategrey;
 }
 
-#hit{
+.enemy-ship{
+    background-color: var(--water-color);
+}
+
+.hit{
    background-color: var(--hit-color);
 }
 
-#miss{
+.miss{
     background-color: black;
 }
