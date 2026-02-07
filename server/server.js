@@ -37,7 +37,7 @@ async function waitForPlayerBJoin(sessionId) {
 
 		if (session.player_b_id != null) {
 			console.log("player b joined!");
-			break;
+			return;
 		}
 
 		console.log("waiting for player b for session ", sessionId);
@@ -45,7 +45,7 @@ async function waitForPlayerBJoin(sessionId) {
 	}
 
 	console.log("Session timed out");
-	sessions.remove(sessionId);
+	sessions.delete(sessionId);
 	return null;
 }
 
@@ -61,15 +61,17 @@ io.on("connection", (socket) => {
 		});
 		sessions.set(sessionId, session);
 		socket.emit("createdSession", sessions.get(sessionId));
+		socket.join(sessionId);
 		waitForPlayerBJoin(sessionId);
 	});
 
 	socket.on("joinSession", (data) => {
 		const session = sessions.get(data);
 		session.player_b_id = socket.id;
+		socket.join(session.session_id);
+		socket.to(session.session_id).emit("beginGame", session);
+		socket.emit("beginGame", session);
 	});
-
-	socket.emit("beginGame");
 
 	socket.on("disconnect", () => {
 		console.log("disconnected:", socket.id);

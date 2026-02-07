@@ -5,15 +5,9 @@ const socket = io("http://localhost:3000", {
 	transports: ["websocket"],
 });
 
-socket.on("createdSession", (msg) => {
-	console.log("createdSession:", msg);
-	const sessionId = document.createElement("h1");
-	sessionId.innerText = msg.session_id;
-	document.body.appendChild(sessionId);
-});
-
 const createMatchButton = document.getElementById("create-match");
 const joinMatchButton = document.getElementById("join-match");
+const confirmButton = document.createElement("div");
 
 createMatchButton.addEventListener("click", createSessionMenu);
 joinMatchButton.addEventListener("click", joinSessionMenu);
@@ -36,7 +30,6 @@ function joinSessionMenu() {
 	const input = document.createElement("input");
 	joinDiv.appendChild(input);
 
-	const confirmButton = document.createElement("div");
 	confirmButton.classList.add("select-button");
 	confirmButton.textContent = "Join";
 
@@ -48,3 +41,22 @@ function joinSessionMenu() {
 		socket.emit("joinSession", input.value);
 	});
 }
+
+socket.on("createdSession", (msg) => {
+	console.log("createdSession:", msg);
+	const sessionId = document.createElement("h1");
+	sessionId.innerText = msg.session_id;
+	document.body.appendChild(sessionId);
+});
+
+socket.on("beginGame", (msg) => {
+	//maybe there is a better way to do this, but for now this removes everything below navbar
+	const nav = document.querySelector("nav");
+	while (nav.nextSibling) {
+		nav.nextSibling.remove();
+	}
+
+	console.log("msg", msg);
+	const notif = document.createElement("h1");
+	notif.innerText = "Joined room!";
+});
