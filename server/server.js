@@ -19,11 +19,21 @@ function createSessionId() {
 	return crypto.randomUUID().slice(0, 8);
 }
 
+const ships = [
+	{ length: 5, name: "Carrier", status: "active" },
+	{ length: 4, name: "Battleship", status: "active" },
+	{ length: 3, name: "Cruiser", status: "active" },
+	{ length: 3, name: "Submarine", status: "active" },
+	{ length: 2, name: "Destroyer", status: "active" },
+];
+
 function createSession({ session_id, player_a_id, player_b_id }) {
 	return {
 		session_id,
 		player_a_id,
+		player_a_ships: ships,
 		player_b_id,
+		player_b_ships: ships,
 		created_at: Date.now(),
 	};
 }

@@ -16,27 +16,6 @@ const ships = [
 	{ length: 2, name: "Destroyer" },
 ];
 
-const toggleBtn = document.getElementById("toggle-dir");
-if (toggleBtn) {
-	toggleBtn.addEventListener("click", () => {
-		placementDir = placementDir === "h" ? "v" : "h";
-		updateDirLabel();
-	});
-}
-
-const dirLabel = document.getElementById("dir-label");
-function updateDirLabel() {
-	if (!dirLabel) return;
-	dirLabel.textContent = placementDir.toUpperCase();
-}
-
-document.addEventListener("keydown", (e) => {
-	if (e.key.toLowerCase() === "r") {
-		placementDir = placementDir === "h" ? "v" : "h";
-		updateDirLabel();
-	}
-});
-
 const friendlyBoard = document.getElementById("friendly-board");
 const enemyBoard = document.getElementById("enemy-board");
 
