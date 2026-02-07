@@ -55,3 +55,60 @@ nav {
 		outline: 1px inset variables.$outline;
 	}
 }
+
+.board {
+	display: flex;
+	flex-wrap: wrap;
+	width: min(520px, 50vw);
+	border: 2px solid white;
+}
+
+.cell {
+	width: calc(100% / 13);
+	aspect-ratio: 1 / 1;
+	box-sizing: border-box;
+	border: 1px solid white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font: 12px system-ui;
+	user-select: none;
+	color: black;
+}
+
+.friendly {
+	background-color: variables.$water_color;
+	&:hover {
+		background-color: variables.$ship_color;
+		cursor: pointer;
+	}
+}
+
+.enemy {
+	background-color: variables.$enemy_water_color;
+	&:hover {
+		background-color: variables.$targeting_color;
+		cursor: crosshair;
+	}
+}
+
+.border {
+	background-color: variables.$bg;
+	cursor: auto;
+}
+
+.ship {
+	background-color: darkslategrey;
+}
+
+.enemy-ship {
+	background-color: var(--water-color);
+}
+
+.hit {
+	background-color: var(--hit-color);
+}
+
+.miss {
+	background-color: black;
+}
