@@ -1,26 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Battleships</title>
-    <link rel="stylesheet" href="styles.css" >
-</head>
-<body>
-    <h1>Battleships</h1>
-    <nav>
-        <a href="#game">Game</a>
-        <a href="history.html">Match History</a>
-    </nav>
-    <span id="dir-label"></span>  
-    <!-- <button class="fire-button">FIRE!</button> -->
-     <button id="toggle-dir">Toggle (R)</button>
-    <select id="friendly-select">
-    </select>
-    <div id="game" class="board-container">
-        <div id="friendly-board" class="board"></div>
-        <div id="enemy-board" class="board"></div>
-    </div>
-    <script type="module" src="src/main.js"></script>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>client</title>
+	</head>
+
+	<body>
+		<h1>Battleships</h1>
+
+		<nav>
+			<a>Game</a>
+			<a>Match History</a>
+		</nav>
+
+		<div class="flex-container">
+			<div class="select-button" id="create-match">Create Match</div>
+			<div class="select-button" id="join-match">Join Match</div>
+		</div>
+
+		<script type="module" src="/src/main.js"></script>
+	</body>
 </html>
