@@ -7,8 +7,6 @@ const socket = io("http://localhost:3000", {
 
 const COL = 13;
 const ROW = 13;
-const GRID_MIN = 1;
-const GRID_MAX = 12;
 
 let placementDir = "h";
 
@@ -68,7 +66,6 @@ socket.on("createdSession", (msg) => {
 });
 
 socket.on("beginGame", (msg) => {
-	//maybe there is a better way to do this, but for now this removes everything below navbar
 	const nav = document.querySelector("nav");
 	while (nav.nextSibling) {
 		nav.nextSibling.remove();
@@ -76,33 +73,36 @@ socket.on("beginGame", (msg) => {
 
 	console.log("msg", msg);
 	const notif = document.createElement("h1");
-	notif.innerText = "Joined room!";
+	notif.innerText = "Joined room: " + msg.session_id;
+	document.body.append(notif);
+
+	const selector = document.createElement("select");
+	selector.id = "friendly-select";
+	document.body.append(selector);
+
+	const gameBoardContainer = document.createElement("div");
+	gameBoardContainer.classList.add("flex-container");
+	document.body.appendChild(gameBoardContainer);
+
+	const friendlyBoard = document.createElement("div");
+	friendlyBoard.classList.add("board");
+	friendlyBoard.id = "friendly-board";
+	gameBoardContainer.appendChild(friendlyBoard);
+
+	const enemyBoard = document.createElement("div");
+	enemyBoard.classList.add("board");
+	enemyBoard.id = "enemy-board";
+	gameBoardContainer.appendChild(enemyBoard);
+	createClientSideBoard(friendlyBoard, true);
+	createClientSideBoard(enemyBoard, false);
+	socket.emit("clientSetupComplete");
 });
 
-const selector = document.createElement("select");
-selector.id = "friendly-select";
-document.body.append(selector);
+socket.on("placeShips", (data) => {
+	console.log("data", data);
+});
 
-const gameBoardContainer = document.createElement("div");
-gameBoardContainer.classList.add("flex-container");
-document.body.appendChild(gameBoardContainer);
-
-const friendlyBoard = document.createElement("div");
-friendlyBoard.classList.add("board");
-friendlyBoard.id = "friendly-board";
-gameBoardContainer.appendChild(friendlyBoard);
-
-const enemyBoard = document.createElement("div");
-enemyBoard.classList.add("board");
-enemyBoard.id = "enemy-board";
-gameBoardContainer.appendChild(enemyBoard);
-
-createBoard(friendlyBoard, true);
-createBoard(enemyBoard, false);
-setOptions(ships);
-placeShips();
-
-function createBoard(board, friendly) {
+function createClientSideBoard(board, friendly) {
 	let numCounter = 1;
 	let letterCounter = 0;
 	let letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"];
@@ -132,72 +132,13 @@ function createBoard(board, friendly) {
 	}
 }
 
-function placeShips() {
-	const selectedShip = document.getElementById("friendly-select");
-	const board = document.getElementById("friendly-board");
-	const cells = board.children;
-
-	for (const cell of cells) {
-		cell.addEventListener("click", () => {
-			if (!cell.dataset.x || !cell.dataset.y) return;
-			if (!selectedShip) return;
-
-			const shipLen = Number(selectedShip.value);
-			const x = Number(cell.dataset.x);
-			const y = Number(cell.dataset.y);
-
-			if (!canPlaceShip(board, x, y, shipLen, placementDir)) {
-				console.log("Can't place ship there!");
-				return;
-			}
-
-			placeShip(board, x, y, shipLen, placementDir, true);
-
-			selectedShip.remove(selectedShip.selectedIndex);
-			if (selectedShip.options.length === 0) {
-				selectedShip.remove();
-			}
+function placeShip(board) {
+	for (let i = 0; i < board.children.length; i++) {
+		board.children[i].addEventListener("click", () => {
+			socket.emit("placeShip", board, {
+				x_coord: board.children[i].dataset.x,
+				y_coord: board.children[i].dataset.y,
+			});
 		});
-	}
-}
-
-function setOptions(ships) {
-	const selectBox = document.getElementById("friendly-select");
-	ships.forEach((ship) => {
-		const opt = document.createElement("option");
-		opt.value = ship.length;
-		opt.innerHTML = ship.name;
-		selectBox.appendChild(opt);
-	});
-}
-
-function inBounds(x, y) {
-	return x >= GRID_MIN && x <= GRID_MAX && y >= GRID_MIN && y <= GRID_MAX;
-}
-
-function canPlaceShip(board, x, y, len, dir = "h") {
-	for (let i = 0; i < len; i++) {
-		const nx = dir === "h" ? x + i : x;
-		const ny = dir === "v" ? y + i : y;
-
-		if (!inBounds(nx, ny)) return false;
-
-		const target = board.querySelector(`[data-x="${nx}"][data-y="${ny}"]`);
-		if (!target) return false;
-		if (
-			target.classList.contains("ship") ||
-			target.classList.contains("enemy-ship")
-		)
-			return false;
-	}
-	return true;
-}
-
-function placeShip(board, x, y, len, dir = "h", friendly) {
-	for (let i = 0; i < len; i++) {
-		const nx = dir === "h" ? x + i : x;
-		const ny = dir === "v" ? y + i : y;
-		const target = board.querySelector(`[data-x="${nx}"][data-y="${ny}"]`);
-		target.classList.add(friendly ? "ship" : "enemy-ship");
 	}
 }

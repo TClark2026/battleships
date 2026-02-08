@@ -27,6 +27,19 @@ nav {
 	}
 }
 
+#friendly-select {
+	font: inherit;
+	font-size: 14px;
+	padding: 8px 36px 8px 12px;
+	border: 1px solid variables.$outline;
+	border-radius: 6px;
+	background-color: variables.$button_color;
+	cursor: pointer;
+	&:hover {
+		outline: 1px inset variables.$outline;
+	}
+}
+
 .flex-container {
 	width: 100dvw;
 	display: flex;
@@ -59,8 +72,9 @@ nav {
 .board {
 	display: flex;
 	flex-wrap: wrap;
-	width: min(520px, 50vw);
+	width: min(520px, 90dvw);
 	border: 2px solid white;
+	flex: 1 1 auto;
 }
 
 .cell {
@@ -78,7 +92,7 @@ nav {
 
 .friendly {
 	background-color: variables.$water_color;
-	&:hover {
+	&:not(.border):hover {
 		background-color: variables.$ship_color;
 		cursor: pointer;
 	}
@@ -86,7 +100,7 @@ nav {
 
 .enemy {
 	background-color: variables.$enemy_water_color;
-	&:hover {
+	&:not(.border):hover {
 		background-color: variables.$targeting_color;
 		cursor: crosshair;
 	}
