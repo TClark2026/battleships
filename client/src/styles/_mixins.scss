@@ -1,0 +1,20 @@
+@use "./variables";
+@mixin select-button(
+	$bg: variables.$button_color,
+	$outline: variables.$outline
+) {
+	display: flex;
+	background-color: $bg;
+	min-width: 5rem;
+	max-width: 20rem;
+	max-height: 2rem;
+	padding: 1rem;
+	border-radius: 1rem;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	border: 1px solid $outline;
+	&:hover {
+		outline: 1px inset $outline;
+	}
+}
