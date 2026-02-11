@@ -1,6 +1,6 @@
 import styles from "./login-form.scss?inline";
 
-export class AppLogin extends HTMLElement {
+export class LoginPage extends HTMLElement {
 
   private root: ShadowRoot;
 
@@ -64,4 +64,4 @@ export class AppLogin extends HTMLElement {
 
 }
 
-customElements.define("login-form", AppLogin);
+customElements.define("login-form", LoginPage);

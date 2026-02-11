@@ -1,0 +1,5 @@
+@use "../../styles/variables";
+div {
+	width: 100dvw;
+	background-color: variables.$button_color;
+}
