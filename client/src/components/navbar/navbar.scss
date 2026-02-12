@@ -1,5 +1,14 @@
 @use "../../styles/variables";
-div {
-	width: 100dvw;
-	background-color: variables.$button_color;
+
+nav {
+	display: flex;
+	gap: 1rem;
+	a {
+		cursor: pointer;
+		font-weight: bold;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
 }
