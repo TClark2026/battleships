@@ -1,0 +1,21 @@
+@use "../../styles/variables";
+
+.invite-container {
+	display: flex;
+	flex-direction: row;
+	gap: 1rem;
+}
+
+.accept-invite {
+	text-align: center;
+	background-color: variables.$button_color;
+	padding: 1rem;
+	cursor: pointer;
+}
+
+.decline-invite {
+	text-align: center;
+	background-color: variables.$targeting_color;
+	padding: 1rem;
+	cursor: pointer;
+}

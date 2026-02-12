@@ -1,13 +1,24 @@
 import styles from "./dashboard.scss?inline";
 import "../navbar/navbar";
-import { listAvailablePlayers, playerList$ } from "../../network/sockets";
+import "../playerList/playerList";
+import "../playerDiv/PlayerDiv";
+import "../inviteList/inviteList";
+import "../inviteDiv/inviteDiv";
+import {
+	listAvailablePlayers,
+	playerList$,
+	playerInvites$,
+	type Invite,
+} from "../../network/sockets";
 import { Subscription } from "rxjs";
 import type { User } from "../../utils/auth";
 
 export class Dashboard extends HTMLElement {
 	private root: ShadowRoot;
-	private sub: Subscription;
+	private lobby: Subscription;
+	private invites: Subscription;
 	private localPlayers: User[] = [];
+	private localInvites: Invite[] = [];
 
 	constructor() {
 		super();
@@ -15,16 +26,30 @@ export class Dashboard extends HTMLElement {
 
 		this.root.innerHTML = `
     <style>${styles}</style>
-	<div class="flex-container"></div>
+	<player-list></player-list>
+	<invite-list></invite-list>
     `;
-		this.sub = playerList$.subscribe((players) => {
+		this.lobby = playerList$.subscribe((players) => {
 			if (JSON.stringify(players) !== JSON.stringify(this.localPlayers)) {
 				this.localPlayers = players;
-				const playerContainer = this.root.querySelector(".flex-container");
+				const playerContainer = this.root.querySelector("player-list");
 				for (const player of this.localPlayers) {
-					const playerDiv = document.createElement("div");
-					playerDiv.innerText = player.username;
-					playerContainer?.appendChild(playerDiv);
+					const playerElem = document.createElement("player-div") as any;
+					playerElem.username = player.username;
+					playerContainer?.appendChild(playerElem);
+				}
+			}
+		});
+
+		this.invites = playerInvites$.subscribe((invites) => {
+			if (JSON.stringify(invites) !== JSON.stringify(this.localInvites)) {
+				this.localInvites = invites;
+				const inviteContainer = this.root.querySelector("invite-list");
+				for (const invite of this.localInvites) {
+					const inviteElem = document.createElement("invite-div") as any;
+					inviteElem.username = invite.from;
+					inviteElem.inviteId = invite.inviteId;
+					inviteContainer?.appendChild(inviteElem);
 				}
 			}
 		});

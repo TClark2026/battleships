@@ -1,0 +1,14 @@
+@use "../../styles/variables";
+
+.player-container {
+	display: flex;
+	flex-direction: row;
+	gap: 1rem;
+}
+
+.send-invite {
+	text-align: center;
+	background-color: variables.$button_color;
+	padding: 1 rem;
+	cursor: pointer;
+}
