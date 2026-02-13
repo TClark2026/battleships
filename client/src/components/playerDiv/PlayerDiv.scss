@@ -1,14 +1,12 @@
 @use "../../styles/variables";
-
+@use "../../styles/mixins";
 .player-container {
 	display: flex;
 	flex-direction: row;
+	align-items: center;
 	gap: 1rem;
 }
 
 .send-invite {
-	text-align: center;
-	background-color: variables.$button_color;
-	padding: 1 rem;
-	cursor: pointer;
+	@include mixins.accept-button;
 }

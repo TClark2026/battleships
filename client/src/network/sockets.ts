@@ -3,9 +3,11 @@ import { BehaviorSubject } from "rxjs";
 import { auth$, authStore, type User } from "../utils/auth";
 import { gameStore } from "../utils/game";
 import {
+	showDefeatToast,
 	showErrorToast,
 	showGameToast,
 	showInfoToast,
+	showVictoryToast,
 	showWarnToast,
 } from "../utils/toast";
 
@@ -30,7 +32,7 @@ type ShipType =
 
 type ShipPlacement = {
 	type: ShipType;
-	start: string; // e.g. "A1"
+	start: string;
 	orientation: PlacementDir;
 };
 
@@ -56,9 +58,20 @@ export const shotsOnMyBoard$ = shotsOnMyBoardSubject.asObservable();
 const shotsOnEnemyBoardSubject = new BehaviorSubject<Shot>(null);
 export const shotsOnEnemyBoard$ = shotsOnEnemyBoardSubject.asObservable();
 
+function clearAllObservables() {
+	playerSubject.next([]);
+	inviteSubject.next([]);
+	shotsOnMyBoardSubject.next(null);
+	shotsOnEnemyBoardSubject.next(null);
+}
+
 export function addInvite(invite: Invite): void {
 	const current = inviteSubject.getValue();
 	inviteSubject.next([...current, invite]);
+}
+export function removeInvite(inviteId: string): void {
+	const current = inviteSubject.getValue();
+	inviteSubject.next(current.filter((invite) => invite.inviteId !== inviteId));
 }
 
 socket.addEventListener("message", (event) => {
@@ -97,11 +110,14 @@ socket.addEventListener("message", (event) => {
 		return;
 	}
 
-	//todo invite decline and expiry
-
 	if (msg.type === "invite_accepted") {
 		gameStore.setGameId(msg.gameId);
 		gameStore.setGameState("PLACE_SHIPS");
+	}
+
+	if (msg.type === "invite_declined") {
+		showWarnToast(`Your invite with ID ${msg.inviteId} was declined`);
+		removeInvite(msg.inviteId);
 	}
 
 	if (msg.type === "game_start") {
@@ -143,6 +159,18 @@ socket.addEventListener("message", (event) => {
 
 	if (msg.type === "game_over") {
 		gameStore.setGameState("CONCLUDED");
+		if (msg.winner === authStore.getUser()?.username) {
+			showVictoryToast(
+				`Congratulations ${msg.winner}, you won! \n Reason: ${msg.reason}`,
+			);
+		} else {
+			showDefeatToast(
+				`Unlucky ${authStore.getUser()?.username}, \n ${msg.winner} defeated you! \n 
+				Reason: ${msg.reason}`,
+			);
+		}
+		clearAllObservables();
+		gameStore.setGameState("NOT_STARTED");
 	}
 
 	if (msg.type === "turn_change") {
@@ -186,6 +214,10 @@ export function sendLoginDetails(username: string, password: string) {
 
 export function listAvailablePlayers() {
 	sendAuthed("list_players");
+}
+
+export function forfeitGame() {
+	sendAuthed("forfeit");
 }
 
 export function invitePlayer(username: string) {

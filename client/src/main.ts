@@ -15,8 +15,11 @@ let prevGameState: string | null = null;
 let gameSub: { unsubscribe(): void } | null = null;
 
 const loginForm = document.querySelector("login-form");
-const appDashboard = document.createElement("app-dashboard");
-const gameBoard = document.createElement("app-gameboard");
+const makeDashboard = () => document.createElement("app-dashboard");
+const makeGameboard = () => document.createElement("app-gameboard");
+
+let appDashboard = makeDashboard();
+let gameBoard = makeGameboard();
 
 loginForm?.addEventListener("login-submit", (e) => {
 	const { username, password } = (e as CustomEvent).detail;
@@ -55,7 +58,14 @@ auth$.subscribe((state) => {
 			prevGameState === "NOT_STARTED" &&
 			gameState !== "NOT_STARTED"
 		) {
+			gameBoard = makeGameboard();
 			document.body.replaceChildren(gameBoard);
+		}
+
+		if (gameState === "CONCLUDED") {
+			appDashboard = makeDashboard();
+			document.body.replaceChildren(appDashboard);
+			prevGameState = null;
 		}
 
 		prevGameState = gameState;

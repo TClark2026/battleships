@@ -1,21 +1,43 @@
 @use "../../styles/variables";
-
+@use "../../styles/mixins";
 .invite-container {
 	display: flex;
-	flex-direction: row;
+	align-items: center;
 	gap: 1rem;
+	padding: 0.4rem;
+}
+@media screen and (max-width: 800px) {
+	.invite-container {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.2rem;
+	}
+
+	.username {
+		white-space: normal;
+	}
+}
+
+.username {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.accept-invite,
+.decline-invite {
+	flex-shrink: 0;
+	padding: 0.4rem 0.8rem;
+	white-space: nowrap;
+	cursor: p;
 }
 
 .accept-invite {
-	text-align: center;
-	background-color: variables.$button_color;
-	padding: 1rem;
-	cursor: pointer;
+	@include mixins.accept-button;
 }
 
 .decline-invite {
-	text-align: center;
-	background-color: variables.$targeting_color;
-	padding: 1rem;
-	cursor: pointer;
+	@include mixins.decline-button;
 }

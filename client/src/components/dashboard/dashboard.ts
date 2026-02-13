@@ -25,6 +25,7 @@ export class Dashboard extends HTMLElement {
 
 		this.root.innerHTML = `
     <style>${styles}</style>
+	<app-navbar></app-navbar>
 	<div class="flex-container">
 	<player-list></player-list>
 	<invite-list></invite-list>
@@ -45,15 +46,35 @@ export class Dashboard extends HTMLElement {
 		this.invites = playerInvites$.subscribe((invites) => {
 			if (JSON.stringify(invites) !== JSON.stringify(this.localInvites)) {
 				this.localInvites = invites;
+
 				const inviteContainer = this.root.querySelector("invite-list");
+				if (!inviteContainer) return;
+
+				inviteContainer.innerHTML = "";
+
 				for (const invite of this.localInvites) {
 					const inviteElem = document.createElement("invite-div") as any;
 					inviteElem.username = invite.from;
 					inviteElem.inviteId = invite.inviteId;
-					inviteContainer?.appendChild(inviteElem);
+					inviteContainer.appendChild(inviteElem);
 				}
 			}
 		});
+	}
+
+	disconnectedCallback() {
+		this.lobby?.unsubscribe();
+
+		this.invites?.unsubscribe();
+
+		const playerContainer = this.root.querySelector("player-list");
+		if (playerContainer) playerContainer.innerHTML = "";
+
+		const inviteContainer = this.root.querySelector("invite-list");
+		if (inviteContainer) inviteContainer.innerHTML = "";
+
+		this.localPlayers = [];
+		this.localInvites = [];
 	}
 }
 

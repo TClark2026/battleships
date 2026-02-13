@@ -1,4 +1,34 @@
 @use "../../styles/variables";
+@use "../../styles/variables" as vars;
+@use "../../styles/mixins" as *;
+
+.controls {
+	@include flex-container;
+	justify-content: center;
+	align-items: center;
+	margin: 1.5rem 0;
+}
+
+.controls .selector {
+	font: inherit;
+	font-size: 14px;
+	padding: 0.6rem 2.5rem 0.6rem 0.75rem;
+	border: 1px solid variables.$outline;
+	border-radius: 0.4rem;
+	background-color: variables.$button_color;
+	cursor: pointer;
+	min-width: 12rem;
+
+	&:hover {
+		outline: 1px inset variables.$outline;
+	}
+}
+
+.controls .reset-btn,
+.forfeit-btn {
+	@include decline-button;
+	min-width: 6rem;
+}
 
 #friendly-select {
 	font: inherit;
@@ -85,4 +115,13 @@
 
 .miss {
 	background-color: black;
+}
+
+.ship-preview {
+	background-color: variables.$ship_color;
+	outline: 1px inset variables.$outline;
+}
+.ship-preview.invalid {
+	background-color: variables.$targeting_color;
+	opacity: 0.85;
 }

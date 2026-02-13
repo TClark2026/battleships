@@ -12,6 +12,7 @@ form {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	font-weight: 600;
 }
 
 .button-container {
@@ -20,11 +21,12 @@ form {
 	justify-content: space-between;
 	padding: 1rem;
 	gap: 1rem;
+
 	@media screen and (max-width: 800px) {
 		flex-direction: column;
 	}
 }
 
 button {
-	@include mixins.select-button;
+	@include mixins.accept-button;
 }

@@ -10,7 +10,7 @@ export class inviteDiv extends HTMLElement {
 		this.root = this.attachShadow({ mode: "open" });
 		this.root.innerHTML = `
     <style>${styles}</style>
-    <div class="player-container">
+    <div class="invite-container">
       <span class="username"></span>
       <div class="accept-invite">Accept Invite</div>
       <div class="decline-invite">Decline Invite</div>

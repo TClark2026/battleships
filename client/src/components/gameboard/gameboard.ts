@@ -1,10 +1,13 @@
 import {
+	forfeitGame,
 	placeShips,
 	shootAt,
 	shotsOnEnemyBoard$,
 	shotsOnMyBoard$,
 } from "../../network/sockets";
 import { game$, gameStore } from "../../utils/game";
+import { Subscription, Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import styles from "./gameboard.scss?inline";
 import "toastify-js/src/toastify.css";
 
@@ -53,6 +56,11 @@ type ShipPlacement = {
 type ShipDef = (typeof ships)[number];
 
 export class Gameboard extends HTMLElement {
+	private previewCells: HTMLElement[] = [];
+	private onBoardMove = (e: MouseEvent) => this.handleBoardHover(e);
+	private onBoardLeave = () => this.clearPreview();
+	private inShipsPhase = false;
+
 	private root: ShadowRoot;
 	private placementDir: PlacementDir = "horizontal";
 
@@ -63,6 +71,10 @@ export class Gameboard extends HTMLElement {
 
 	private selector: HTMLSelectElement | null = null;
 	private resetButton: HTMLButtonElement | null = null;
+	private forfeitButton: HTMLButtonElement | null = null;
+
+	private destroy$ = new Subject<void>();
+	private subscriptions = new Subscription();
 
 	private onSelectorChange = () => {
 		if (!this.selector) return;
@@ -83,6 +95,7 @@ export class Gameboard extends HTMLElement {
       <div class="controls">
         <select class="selector"></select>
         <button class="reset-btn" type="button">Reset</button>
+		<button class="forfeit-btn" type="button">Forfeit</button>
       </div>
       <div class="boards">
         <div class="board friendly-board" part="friendly-board"></div>
@@ -94,13 +107,7 @@ export class Gameboard extends HTMLElement {
 	connectedCallback() {
 		this.selector = this.root.querySelector(".selector");
 		this.resetButton = this.root.querySelector(".reset-btn");
-
-		game$.subscribe((gameState) => {
-			if (gameState === "PLACE_SHIPS") {
-				this.resetBoard();
-				this.rebuildSelector();
-			}
-		});
+		this.forfeitButton = this.root.querySelector(".forfeit-btn");
 
 		const friendlyBoard =
 			this.root.querySelector<HTMLDivElement>(".friendly-board");
@@ -112,77 +119,82 @@ export class Gameboard extends HTMLElement {
 
 		window.addEventListener("keydown", this.onKeyDown);
 		friendlyBoard.addEventListener("click", this.onBoardClick);
+		friendlyBoard.addEventListener("mousemove", this.onBoardMove);
+		friendlyBoard.addEventListener("mouseleave", this.onBoardLeave);
+
 		enemyBoard.addEventListener("click", this.onBoardClick);
 
 		this.selector?.addEventListener("change", this.onSelectorChange);
 		this.resetButton?.addEventListener("click", this.onResetClick);
-
-		shotsOnEnemyBoard$.subscribe((shot) => {
-			if (!shot) return;
-
-			const enemyBoard =
-				this.root.querySelector<HTMLDivElement>(".enemy-board");
-			if (!enemyBoard) return;
-
-			const coord = shot.coordinate;
-			if (!coord) return;
-
-			let x: string | undefined;
-			let y: string | undefined;
-
-			if (typeof coord === "string") {
-				const m = coord.match(/^([A-L])(\d{1,2})$/);
-				if (!m) return;
-				x = m[1];
-				y = m[2];
-			} else {
-				return;
-			}
-
-			const cell = enemyBoard.querySelector<HTMLElement>(
-				`.cell[data-x="${x}"][data-y="${y}"]`,
-			);
-
-			if (!cell) return;
-
-			if (shot.hit) cell.classList.add("hit");
-			else cell.classList.add("miss");
+		this.forfeitButton?.addEventListener("click", () => {
+			console.log("clicked");
+			forfeitGame();
 		});
 
-		shotsOnMyBoard$.subscribe((shot) => {
-			if (!shot) return;
+		this.subscriptions.add(
+			game$.pipe(takeUntil(this.destroy$)).subscribe((gameState) => {
+				if (gameState === "PLACE_SHIPS") {
+					this.resetBoard();
+					this.rebuildSelector();
+					this.inShipsPhase = true;
+				} else {
+					this.inShipsPhase = false;
+				}
+			}),
+		);
 
-			const friendlyBoard =
-				this.root.querySelector<HTMLDivElement>(".friendly-board");
-			if (!friendlyBoard) return;
+		this.subscriptions.add(
+			shotsOnEnemyBoard$.pipe(takeUntil(this.destroy$)).subscribe((shot) => {
+				if (!shot) return;
+				const enemyBoard =
+					this.root.querySelector<HTMLDivElement>(".enemy-board");
+				if (!enemyBoard) return;
 
-			const coord = shot.coordinate;
-			if (!coord) return;
+				const coord = shot.coordinate;
+				if (!coord || typeof coord !== "string") return;
 
-			let x: string | undefined;
-			let y: string | undefined;
-
-			if (typeof coord === "string") {
 				const m = coord.match(/^([A-L])(\d{1,2})$/);
 				if (!m) return;
-				x = m[1];
-				y = m[2];
-			} else {
-				return;
-			}
 
-			const cell = friendlyBoard.querySelector<HTMLElement>(
-				`.cell[data-x="${x}"][data-y="${y}"]`,
-			);
+				const [_, x, y] = m;
 
-			if (!cell) return;
+				const cell = enemyBoard.querySelector<HTMLElement>(
+					`.cell[data-x="${x}"][data-y="${y}"]`,
+				);
 
-			if (cell.classList.contains("ship")) {
-				cell.classList.add("hit");
-			} else {
-				cell.classList.add("miss");
-			}
-		});
+				if (!cell) return;
+				cell.classList.add(shot.hit ? "hit" : "miss");
+			}),
+		);
+
+		this.subscriptions.add(
+			shotsOnMyBoard$.pipe(takeUntil(this.destroy$)).subscribe((shot) => {
+				if (!shot) return;
+				const friendlyBoard =
+					this.root.querySelector<HTMLDivElement>(".friendly-board");
+				if (!friendlyBoard) return;
+
+				const coord = shot.coordinate;
+				if (!coord || typeof coord !== "string") return;
+
+				const m = coord.match(/^([A-L])(\d{1,2})$/);
+				if (!m) return;
+
+				const [_, x, y] = m;
+
+				const cell = friendlyBoard.querySelector<HTMLElement>(
+					`.cell[data-x="${x}"][data-y="${y}"]`,
+				);
+
+				if (!cell) return;
+
+				if (cell.classList.contains("ship")) {
+					cell.classList.add("hit");
+				} else {
+					cell.classList.add("miss");
+				}
+			}),
+		);
 	}
 
 	disconnectedCallback() {
@@ -193,10 +205,18 @@ export class Gameboard extends HTMLElement {
 		const enemyBoard = this.root.querySelector<HTMLDivElement>(".enemy-board");
 
 		friendlyBoard?.removeEventListener("click", this.onBoardClick);
+		friendlyBoard?.removeEventListener("mousemove", this.onBoardMove);
+		friendlyBoard?.removeEventListener("mouseleave", this.onBoardLeave);
+
 		enemyBoard?.removeEventListener("click", this.onBoardClick);
 
 		this.selector?.removeEventListener("change", this.onSelectorChange);
 		this.resetButton?.removeEventListener("click", this.onResetClick);
+
+		this.destroy$.next();
+		this.destroy$.complete();
+
+		this.subscriptions.unsubscribe();
 	}
 
 	private resetBoard() {
@@ -211,6 +231,7 @@ export class Gameboard extends HTMLElement {
 		this.placedShipsInfo = [];
 		this.placedTypes.clear();
 		this.placedBoat = null;
+		this.clearPreview();
 
 		this.rebuildSelector();
 	}
@@ -270,6 +291,7 @@ export class Gameboard extends HTMLElement {
 			);
 
 			if (!targetCell || targetCell.classList.contains("ship")) {
+				console.log("invalid");
 				return false;
 			}
 		}
@@ -315,7 +337,10 @@ export class Gameboard extends HTMLElement {
 				`.cell[data-x="${colLetter}"][data-y="${row}"]`,
 			);
 
-			if (targetCell) targetCell.classList.add("ship");
+			if (targetCell) {
+				this.clearPreview();
+				targetCell.classList.add("ship");
+			}
 		}
 
 		this.placedShipsInfo.push({
@@ -332,6 +357,94 @@ export class Gameboard extends HTMLElement {
 
 		this.rebuildSelector();
 	};
+
+	private clearPreview() {
+		for (const cell of this.previewCells) {
+			cell.classList.remove("ship-preview", "invalid");
+		}
+		this.previewCells = [];
+	}
+
+	private getPlacementCells(
+		board: HTMLDivElement,
+		x: ColumnLetter,
+		y: number,
+		len: number,
+		dir: PlacementDir,
+	) {
+		const startIndex = LETTERS.indexOf(x);
+		if (startIndex === -1) return null;
+
+		const dx = dir === "horizontal" ? 1 : 0;
+		const dy = dir === "vertical" ? 1 : 0;
+
+		const cells: HTMLElement[] = [];
+
+		for (let i = 0; i < len; i++) {
+			const colIndex = startIndex + i * dx;
+			const row = y + i * dy;
+
+			if (colIndex < 0 || colIndex >= LETTERS.length) return null;
+			if (row < 1 || row > 12) return null;
+
+			const colLetter = LETTERS[colIndex];
+			const targetCell = board.querySelector<HTMLElement>(
+				`.cell[data-x="${colLetter}"][data-y="${row}"]`,
+			);
+
+			if (!targetCell) return null;
+			cells.push(targetCell);
+		}
+
+		return cells;
+	}
+
+	private handleBoardHover(e: MouseEvent) {
+		const board = e.currentTarget as HTMLDivElement;
+		if (!board.classList.contains("friendly-board")) return;
+
+		if (!this.inShipsPhase) return;
+
+		const target = e.target as HTMLElement | null;
+		const cell = target?.closest<HTMLElement>(".cell");
+		if (!cell || cell.classList.contains("border")) {
+			this.clearPreview();
+			return;
+		}
+
+		if (!this.placedBoat) {
+			this.clearPreview();
+			return;
+		}
+
+		if (this.placedTypes.has(this.placedBoat.type)) {
+			this.clearPreview();
+			return;
+		}
+
+		const x = cell.dataset.x as ColumnLetter | undefined;
+		const yStr = cell.dataset.y;
+		if (!x || !yStr) {
+			this.clearPreview();
+			return;
+		}
+
+		const y = Number(yStr);
+		const len = this.placedBoat.length;
+
+		const cells = this.getPlacementCells(board, x, y, len, this.placementDir);
+		this.clearPreview();
+		if (!cells) return;
+
+		const valid = this.canPlaceShip(board, x, y, len, this.placementDir);
+
+		for (const c of cells) {
+			c.classList.add("ship-preview");
+			if (!valid) c.classList.add("invalid");
+		}
+
+		this.previewCells = cells;
+	}
 
 	private createClientSideBoard(board: HTMLDivElement, friendly: boolean) {
 		let numCounter = 1;
