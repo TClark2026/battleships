@@ -1,0 +1,88 @@
+@use "../../styles/variables";
+
+#friendly-select {
+	font: inherit;
+	font-size: 14px;
+	padding: 8px 36px 8px 12px;
+	border: 1px solid variables.$outline;
+	border-radius: 6px;
+	background-color: variables.$button_color;
+	cursor: pointer;
+	&:hover {
+		outline: 1px inset variables.$outline;
+	}
+}
+
+.select-button {
+	background-color: variables.$button_color;
+	text-align: center;
+	flex: 1;
+	min-width: 10rem;
+	max-width: 20rem;
+	padding: 3rem;
+	border-radius: 1rem;
+	cursor: pointer;
+	border: 1px solid variables.$outline;
+	&:hover {
+		cursor: pointer;
+		outline: 1px inset variables.$outline;
+	}
+}
+
+.board {
+	display: flex;
+	flex-wrap: wrap;
+	width: min(520px, 90dvw);
+	border: 2px solid white;
+	flex: 1 1 auto;
+}
+
+.cell {
+	width: calc(100% / 13);
+	aspect-ratio: 1 / 1;
+	box-sizing: border-box;
+	border: 1px solid white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font: 12px system-ui;
+	user-select: none;
+	color: black;
+}
+
+.friendly {
+	background-color: variables.$water_color;
+	&:not(.border):hover {
+		background-color: variables.$ship_color;
+		cursor: pointer;
+	}
+}
+
+.enemy {
+	background-color: variables.$enemy_water_color;
+	&:not(.border):hover {
+		background-color: variables.$targeting_color;
+		cursor: crosshair;
+	}
+}
+
+.border {
+	background-color: variables.$bg;
+	cursor: auto;
+}
+
+.ship {
+	background-color: darkslategrey;
+}
+
+.enemy-ship {
+	background-color: var(--water-color);
+}
+
+.hit {
+	background-color: red;
+}
+
+.miss {
+	background-color: black;
+}

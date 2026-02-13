@@ -5,7 +5,6 @@ import "../playerDiv/PlayerDiv";
 import "../inviteList/inviteList";
 import "../inviteDiv/inviteDiv";
 import {
-	listAvailablePlayers,
 	playerList$,
 	playerInvites$,
 	type Invite,
@@ -26,8 +25,10 @@ export class Dashboard extends HTMLElement {
 
 		this.root.innerHTML = `
     <style>${styles}</style>
+	<div class="flex-container">
 	<player-list></player-list>
 	<invite-list></invite-list>
+	</div>
     `;
 		this.lobby = playerList$.subscribe((players) => {
 			if (JSON.stringify(players) !== JSON.stringify(this.localPlayers)) {
@@ -53,12 +54,6 @@ export class Dashboard extends HTMLElement {
 				}
 			}
 		});
-	}
-
-	connectedCallback() {
-		setInterval(() => {
-			listAvailablePlayers();
-		}, 5000);
 	}
 }
 

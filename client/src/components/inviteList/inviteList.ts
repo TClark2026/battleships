@@ -9,8 +9,9 @@ export class Invite extends HTMLElement {
 		this.root.innerHTML = `
     <style>${styles}</style>
     <div class="invite-list-container">
+	<h2>Pending Invites</h2>
        <slot>
-	   
+		<p>No Invites Received</p>
 	   </slot>
     </div>
     

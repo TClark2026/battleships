@@ -1,6 +1,13 @@
 const socket = new WebSocket("ws://localhost:3000");
 import { BehaviorSubject } from "rxjs";
-import { authStore, type User } from "../utils/auth";
+import { auth$, authStore, type User } from "../utils/auth";
+import { gameStore } from "../utils/game";
+import {
+	showErrorToast,
+	showGameToast,
+	showInfoToast,
+	showWarnToast,
+} from "../utils/toast";
 
 socket.addEventListener("open", () => {
 	console.log("connected");
@@ -12,11 +19,42 @@ export type Invite = {
 	from: string;
 };
 
+type PlacementDir = "horizontal" | "vertical";
+
+type ShipType =
+	| "carrier"
+	| "battleship"
+	| "cruiser"
+	| "submarine"
+	| "destroyer";
+
+type ShipPlacement = {
+	type: ShipType;
+	start: string; // e.g. "A1"
+	orientation: PlacementDir;
+};
+
+type ShipsPayload = {
+	ships: ShipPlacement[];
+};
+
+type Shot = {
+	coordinate: string;
+	hit: boolean;
+	sunk: string | null;
+} | null;
+
 const playerSubject = new BehaviorSubject<User[]>([]);
 export const playerList$ = playerSubject.asObservable();
 
 const inviteSubject = new BehaviorSubject<Invite[]>([]);
 export const playerInvites$ = inviteSubject.asObservable();
+
+const shotsOnMyBoardSubject = new BehaviorSubject<Shot>(null);
+export const shotsOnMyBoard$ = shotsOnMyBoardSubject.asObservable();
+
+const shotsOnEnemyBoardSubject = new BehaviorSubject<Shot>(null);
+export const shotsOnEnemyBoard$ = shotsOnEnemyBoardSubject.asObservable();
 
 export function addInvite(invite: Invite): void {
 	const current = inviteSubject.getValue();
@@ -26,6 +64,16 @@ export function addInvite(invite: Invite): void {
 socket.addEventListener("message", (event) => {
 	const msg = JSON.parse(String(event.data));
 	console.log("msg", msg);
+	if (
+		msg.type === "error" ||
+		msg.type === "game_error" ||
+		msg.type === "auth_error"
+	) {
+		const message = msg.message + "!";
+		showErrorToast(message ?? "An unexpected error occurred.");
+		return;
+	}
+
 	if (msg.type === "auth_success") {
 		authStore.setAuth({
 			sessionToken: msg.sessionToken,
@@ -47,6 +95,68 @@ socket.addEventListener("message", (event) => {
 	if (msg.type === "invite_received") {
 		addInvite(msg as Invite);
 		return;
+	}
+
+	//todo invite decline and expiry
+
+	if (msg.type === "invite_accepted") {
+		gameStore.setGameId(msg.gameId);
+		gameStore.setGameState("PLACE_SHIPS");
+	}
+
+	if (msg.type === "game_start") {
+		gameStore.setGameState("FIRING");
+		showInfoToast("GAME START!");
+		if (msg.yourTurn) {
+			showInfoToast("It's your turn!");
+		}
+	}
+
+	if (msg.type === "ships_accepted") {
+		showInfoToast("Successfully Placed ships!");
+	}
+
+	if (msg.type === "waiting_for_opponent") {
+		showWarnToast("Waiting For Opponent!");
+	}
+
+	if (msg.type === "shot_result") {
+		shotsOnEnemyBoardSubject.next({
+			coordinate: msg.coordinate,
+			hit: msg.hit,
+			sunk: msg.sunk,
+		});
+		if (msg.hit) {
+			showGameToast("Hit! " + msg.coordinate);
+		} else {
+			showGameToast("Missed! " + msg.coordinate);
+		}
+	}
+
+	if (msg.type === "shot_fired") {
+		shotsOnMyBoardSubject.next({
+			coordinate: msg.coordinate,
+			hit: msg.hit,
+			sunk: msg.sunk,
+		});
+	}
+
+	if (msg.type === "game_over") {
+		gameStore.setGameState("CONCLUDED");
+	}
+
+	if (msg.type === "turn_change") {
+		if (msg.currentTurn === authStore.getUser()?.username) {
+			showInfoToast("It's your turn!");
+		}
+	}
+	//{ "type": "ship_sunk", "shipType": "destroyer", "player": "player2" }
+	if (msg.type === "ship_sunk") {
+		if (msg.player === authStore.getUser()?.username) {
+			showGameToast(`Your ${msg.shipType} was sunk`);
+		} else {
+			showGameToast(`${msg.player}'s ${msg.shipType} was sunk`);
+		}
 	}
 });
 
@@ -97,6 +207,14 @@ export function acceptInvitation(inviteId: string) {
 
 export function declineInvitation(inviteId: string) {
 	sendAuthed("decline_invite", { inviteId: inviteId });
+}
+
+export function placeShips(ships: ShipsPayload) {
+	sendAuthed("place_ships", ships);
+}
+
+export function shootAt(coordinate: string) {
+	sendAuthed("shoot", { coordinate: coordinate });
 }
 
 function sendAuthed(type: string, payload?: Record<string, unknown>) {
