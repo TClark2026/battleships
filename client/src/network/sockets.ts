@@ -1,6 +1,6 @@
 const socket = new WebSocket("ws://localhost:3000");
 import { BehaviorSubject } from "rxjs";
-import { auth$, authStore, type User } from "../utils/auth";
+import { authStore, type User } from "../utils/auth";
 import { gameStore } from "../utils/game";
 import {
 	showDefeatToast,

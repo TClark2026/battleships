@@ -5,7 +5,7 @@ import {
 	shotsOnEnemyBoard$,
 	shotsOnMyBoard$,
 } from "../../network/sockets";
-import { game$, gameStore } from "../../utils/game";
+import { game$ } from "../../utils/game";
 import { Subscription, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import styles from "./gameboard.scss?inline";

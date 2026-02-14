@@ -67,6 +67,15 @@
 	flex: 1 1 auto;
 }
 
+.boards {
+	display: flex;
+	flex-direction: row;
+
+	@media screen and (max-width: 800px) {
+		flex-direction: column;
+	}
+}
+
 .cell {
 	width: calc(100% / 13);
 	aspect-ratio: 1 / 1;
