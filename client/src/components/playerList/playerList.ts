@@ -8,8 +8,8 @@ export class Player extends HTMLElement {
 
 		this.root.innerHTML = `
     <style>${styles}</style>
-    <div class="player-list-container">
-	<h2>Online Players</h2>
+	<div class="player-list-container">
+	 <h2>Online Players</h2>
        <slot>
 	    <p>No available players</p>
 	   </slot>

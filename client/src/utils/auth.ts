@@ -9,6 +9,8 @@ export type AuthState =
 	| { status: "anon"; sessionToken: null; user: null }
 	| { status: "authed"; sessionToken: string; user: User };
 
+const SESSION_TOKEN_KEY = "sessionToken";
+
 const initialAuthState: AuthState = {
 	status: "anon",
 	sessionToken: null,
@@ -17,11 +19,20 @@ const initialAuthState: AuthState = {
 
 const authSubject = new BehaviorSubject<AuthState>(initialAuthState);
 
-//the $ means that auth is a stream rxjs say this is a convention
 export const auth$ = authSubject.asObservable();
+
+function storeToken(token: string) {
+	localStorage.setItem(SESSION_TOKEN_KEY, token);
+}
+
+function clearStoredToken() {
+	localStorage.removeItem(SESSION_TOKEN_KEY);
+}
 
 export const authStore = {
 	setAuth(payload: { sessionToken: string; user: User }) {
+		storeToken(payload.sessionToken);
+
 		authSubject.next({
 			status: "authed",
 			sessionToken: payload.sessionToken,
@@ -30,6 +41,8 @@ export const authStore = {
 	},
 
 	clearAuth() {
+		clearStoredToken();
+
 		authSubject.next({
 			status: "anon",
 			sessionToken: null,
@@ -45,6 +58,10 @@ export const authStore = {
 		return authSubject.value.status === "authed"
 			? authSubject.value.sessionToken
 			: null;
+	},
+
+	getStoredToken(): string | null {
+		return localStorage.getItem(SESSION_TOKEN_KEY);
 	},
 
 	getUser() {

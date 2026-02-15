@@ -1,6 +1,12 @@
 import { BehaviorSubject } from "rxjs";
 
-export type GameState = "NOT_STARTED" | "PLACE_SHIPS" | "FIRING" | "CONCLUDED";
+export type GameState =
+	| "NOT_STARTED"
+	| "PLACE_SHIPS"
+	| "FIRING"
+	| "CONCLUDED"
+	| "LOBBY"
+	| "HISTORY";
 
 const gameSubject = new BehaviorSubject<GameState>("NOT_STARTED");
 let gameId: string | null = null;
@@ -31,5 +37,11 @@ export const gameStore = {
 
 	getWinner() {
 		return gameWinner;
+	},
+
+	reset() {
+		gameSubject.next("NOT_STARTED");
+		gameId = null;
+		gameWinner = null;
 	},
 };

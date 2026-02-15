@@ -134,3 +134,8 @@
 	background-color: variables.$targeting_color;
 	opacity: 0.85;
 }
+
+.controls.placement-done .selector,
+.controls.placement-done .reset-btn {
+	display: none;
+}

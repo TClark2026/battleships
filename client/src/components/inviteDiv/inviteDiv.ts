@@ -12,8 +12,10 @@ export class inviteDiv extends HTMLElement {
     <style>${styles}</style>
     <div class="invite-container">
       <span class="username"></span>
-      <div class="accept-invite">Accept Invite</div>
+      <div class="btn-container">
+	  <div class="accept-invite">Accept Invite</div>
       <div class="decline-invite">Decline Invite</div>
+	  </div>
     </div>
   `;
 

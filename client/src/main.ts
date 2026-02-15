@@ -2,6 +2,7 @@ import "./styles/main.scss";
 import "./components/login-form/login-form";
 import "./components/dashboard/dashboard";
 import "./components/gameboard/gameboard";
+
 import {
 	listAvailablePlayers,
 	sendLoginDetails,
@@ -15,6 +16,7 @@ let prevGameState: string | null = null;
 let gameSub: { unsubscribe(): void } | null = null;
 
 const loginForm = document.querySelector("login-form");
+
 const makeDashboard = () => document.createElement("app-dashboard");
 const makeGameboard = () => document.createElement("app-gameboard");
 
@@ -51,12 +53,9 @@ auth$.subscribe((state) => {
 			}
 		}
 
-		const transitioned = gameState !== prevGameState;
-
 		if (
-			transitioned &&
-			prevGameState === "NOT_STARTED" &&
-			gameState !== "NOT_STARTED"
+			gameState !== "NOT_STARTED" &&
+			(prevGameState === null || prevGameState === "NOT_STARTED")
 		) {
 			gameBoard = makeGameboard();
 			document.body.replaceChildren(gameBoard);

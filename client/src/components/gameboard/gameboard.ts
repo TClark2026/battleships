@@ -4,12 +4,14 @@ import {
 	shootAt,
 	shotsOnEnemyBoard$,
 	shotsOnMyBoard$,
+	reconnectGameState$,
+	type ShipType,
 } from "../../network/sockets";
-import { game$ } from "../../utils/game";
 import { Subscription, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import styles from "./gameboard.scss?inline";
 import "toastify-js/src/toastify.css";
+import { game$, type GameState } from "../../utils/game";
 
 const COL = 13;
 const ROW = 13;
@@ -40,13 +42,6 @@ const ships = [
 
 type PlacementDir = "horizontal" | "vertical";
 
-type ShipType =
-	| "carrier"
-	| "battleship"
-	| "cruiser"
-	| "submarine"
-	| "destroyer";
-
 type ShipPlacement = {
 	type: ShipType;
 	start: string;
@@ -55,11 +50,20 @@ type ShipPlacement = {
 
 type ShipDef = (typeof ships)[number];
 
+type ReconnectGameState = {
+	type: "reconnect_game_state";
+	gameId: string;
+	ships: { type: ShipType; tiles: string[]; hits: string[] }[];
+	shots: { coordinate: string; hit: boolean; sunk: ShipType | null }[];
+};
+
 export class Gameboard extends HTMLElement {
 	private previewCells: HTMLElement[] = [];
 	private onBoardMove = (e: MouseEvent) => this.handleBoardHover(e);
 	private onBoardLeave = () => this.clearPreview();
 	private inShipsPhase = false;
+	private hasRestoredBoard = false;
+	private currentGameState: GameState = "NOT_STARTED";
 
 	private root: ShadowRoot;
 	private placementDir: PlacementDir = "horizontal";
@@ -75,6 +79,7 @@ export class Gameboard extends HTMLElement {
 
 	private destroy$ = new Subject<void>();
 	private subscriptions = new Subscription();
+	private allShipsPlaced = false;
 
 	private onSelectorChange = () => {
 		if (!this.selector) return;
@@ -132,9 +137,18 @@ export class Gameboard extends HTMLElement {
 		});
 
 		this.subscriptions.add(
+			reconnectGameState$.pipe(takeUntil(this.destroy$)).subscribe((state) => {
+				if (!state) return;
+				this.applyReconnectState(state);
+			}),
+		);
+
+		this.subscriptions.add(
 			game$.pipe(takeUntil(this.destroy$)).subscribe((gameState) => {
+				this.currentGameState = gameState;
+
 				if (gameState === "PLACE_SHIPS") {
-					this.resetBoard();
+					if (!this.hasRestoredBoard) this.resetBoard();
 					this.rebuildSelector();
 					this.inShipsPhase = true;
 				} else {
@@ -156,7 +170,7 @@ export class Gameboard extends HTMLElement {
 				const m = coord.match(/^([A-L])(\d{1,2})$/);
 				if (!m) return;
 
-				const [_, x, y] = m;
+				const [, x, y] = m;
 
 				const cell = enemyBoard.querySelector<HTMLElement>(
 					`.cell[data-x="${x}"][data-y="${y}"]`,
@@ -180,7 +194,7 @@ export class Gameboard extends HTMLElement {
 				const m = coord.match(/^([A-L])(\d{1,2})$/);
 				if (!m) return;
 
-				const [_, x, y] = m;
+				const [, x, y] = m;
 
 				const cell = friendlyBoard.querySelector<HTMLElement>(
 					`.cell[data-x="${x}"][data-y="${y}"]`,
@@ -225,14 +239,17 @@ export class Gameboard extends HTMLElement {
 		if (!friendlyBoard) return;
 
 		friendlyBoard
-			.querySelectorAll<HTMLElement>(".cell.ship")
-			.forEach((cell) => cell.classList.remove("ship"));
+			.querySelectorAll<HTMLElement>(".cell.ship, .cell.hit, .cell.miss")
+			.forEach((cell) => cell.classList.remove("ship", "hit", "miss"));
+
+		this.hasRestoredBoard = false;
 
 		this.placedShipsInfo = [];
 		this.placedTypes.clear();
 		this.placedBoat = null;
 		this.clearPreview();
-
+		this.allShipsPlaced = false;
+		this.updateControlsVisibility();
 		this.rebuildSelector();
 	}
 
@@ -309,28 +326,29 @@ export class Gameboard extends HTMLElement {
 		const yStr = cell.dataset.y;
 		if (!x || !yStr) return;
 
-		const coords = { x, y: Number(yStr) };
-
 		if (board.classList.contains("enemy-board")) {
+			if (this.currentGameState !== "FIRING") return;
 			shootAt(String(x + yStr));
 			return;
 		}
+
+		if (this.currentGameState !== "PLACE_SHIPS") return;
 
 		if (!this.placedBoat) return;
 		if (this.placedTypes.has(this.placedBoat.type)) return;
 
 		const len = this.placedBoat.length;
 
-		if (!this.canPlaceShip(board, coords.x, coords.y, len, this.placementDir))
+		if (!this.canPlaceShip(board, x, Number(yStr), len, this.placementDir))
 			return;
 
-		const startIndex = LETTERS.indexOf(coords.x);
+		const startIndex = LETTERS.indexOf(x);
 		const dx = this.placementDir === "horizontal" ? 1 : 0;
 		const dy = this.placementDir === "vertical" ? 1 : 0;
 
 		for (let i = 0; i < len; i++) {
 			const colIndex = startIndex + i * dx;
-			const row = coords.y + i * dy;
+			const row = Number(yStr) + i * dy;
 			const colLetter = LETTERS[colIndex];
 
 			const targetCell = board.querySelector<HTMLElement>(
@@ -345,7 +363,7 @@ export class Gameboard extends HTMLElement {
 
 		this.placedShipsInfo.push({
 			type: this.placedBoat.type,
-			start: `${coords.x}${coords.y}`,
+			start: `${x}${Number(yStr)}`,
 			orientation: this.placementDir,
 		});
 
@@ -353,6 +371,11 @@ export class Gameboard extends HTMLElement {
 
 		if (this.placedShipsInfo.length >= ships.length) {
 			placeShips({ ships: this.placedShipsInfo });
+
+			this.allShipsPlaced = true;
+			this.updateControlsVisibility();
+
+			return;
 		}
 
 		this.rebuildSelector();
@@ -444,6 +467,75 @@ export class Gameboard extends HTMLElement {
 		}
 
 		this.previewCells = cells;
+	}
+
+	private applyReconnectState(state: ReconnectGameState) {
+		const friendlyBoard =
+			this.root.querySelector<HTMLDivElement>(".friendly-board");
+		const enemyBoard = this.root.querySelector<HTMLDivElement>(".enemy-board");
+		if (!friendlyBoard || !enemyBoard) return;
+
+		friendlyBoard
+			.querySelectorAll<HTMLElement>(".cell.ship, .cell.hit, .cell.miss")
+			.forEach((cell) => cell.classList.remove("ship", "hit", "miss"));
+		enemyBoard
+			.querySelectorAll<HTMLElement>(".cell.hit, .cell.miss")
+			.forEach((cell) => cell.classList.remove("hit", "miss"));
+
+		this.placedShipsInfo = [];
+		this.placedTypes.clear();
+		this.placedBoat = null;
+		this.clearPreview();
+
+		for (const ship of state.ships ?? []) {
+			this.placedTypes.add(ship.type);
+			for (const tile of ship.tiles ?? []) {
+				const m = tile.match(/^([A-L])(\d{1,2})$/);
+				if (!m) continue;
+				const [, x, y] = m;
+
+				const cell = friendlyBoard.querySelector<HTMLElement>(
+					`.cell[data-x="${x}"][data-y="${y}"]`,
+				);
+				cell?.classList.add("ship");
+			}
+			for (const hitTile of ship.hits ?? []) {
+				const m = hitTile.match(/^([A-L])(\d{1,2})$/);
+				if (!m) continue;
+				const [, x, y] = m;
+				const cell = friendlyBoard.querySelector<HTMLElement>(
+					`.cell[data-x="${x}"][data-y="${y}"]`,
+				);
+				cell?.classList.add("hit");
+			}
+		}
+
+		for (const shot of state.shots ?? []) {
+			const coord = shot.coordinate;
+			const m = coord?.match(/^([A-L])(\d{1,2})$/);
+			if (!m) continue;
+			const [, x, y] = m;
+
+			const cell = enemyBoard.querySelector<HTMLElement>(
+				`.cell[data-x="${x}"][data-y="${y}"]`,
+			);
+			if (!cell) continue;
+			cell.classList.add(shot.hit ? "hit" : "miss");
+		}
+
+		this.hasRestoredBoard = true;
+
+		this.allShipsPlaced = this.placedTypes.size >= ships.length;
+		this.updateControlsVisibility();
+
+		if (!this.allShipsPlaced) this.rebuildSelector();
+	}
+
+	private updateControlsVisibility() {
+		const controls = this.root.querySelector<HTMLElement>(".controls");
+		if (!controls) return;
+
+		controls.classList.toggle("placement-done", this.allShipsPlaced);
 	}
 
 	private createClientSideBoard(board: HTMLDivElement, friendly: boolean) {

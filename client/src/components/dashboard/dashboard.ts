@@ -8,17 +8,18 @@ import {
 	playerList$,
 	playerInvites$,
 	type Invite,
+	type GameHistoryItem,
 } from "../../network/sockets";
 import { Subscription } from "rxjs";
-import type { User } from "../../utils/auth";
+import type { PlayerDiv } from "../playerDiv/PlayerDiv";
+import type { inviteDiv } from "../inviteDiv/inviteDiv";
+import { authStore } from "../../utils/auth";
 
 export class Dashboard extends HTMLElement {
 	private root: ShadowRoot;
 	private lobby: Subscription;
 	private invites: Subscription;
-	private localPlayers: User[] = [];
 	private localInvites: Invite[] = [];
-
 	constructor() {
 		super();
 		this.root = this.attachShadow({ mode: "open" });
@@ -32,14 +33,14 @@ export class Dashboard extends HTMLElement {
 	</div>
     `;
 		this.lobby = playerList$.subscribe((players) => {
-			if (JSON.stringify(players) !== JSON.stringify(this.localPlayers)) {
-				this.localPlayers = players;
-				const playerContainer = this.root.querySelector("player-list");
-				for (const player of this.localPlayers) {
-					const playerElem = document.createElement("player-div") as any;
-					playerElem.username = player.username;
-					playerContainer?.appendChild(playerElem);
-				}
+			const playerContainer = this.root.querySelector("player-list");
+			if (!playerContainer) return;
+
+			playerContainer.innerHTML = "";
+			for (const player of players) {
+				const playerElem = document.createElement("player-div") as PlayerDiv;
+				playerElem.username = player.username;
+				playerContainer.appendChild(playerElem);
 			}
 		});
 
@@ -53,13 +54,64 @@ export class Dashboard extends HTMLElement {
 				inviteContainer.innerHTML = "";
 
 				for (const invite of this.localInvites) {
-					const inviteElem = document.createElement("invite-div") as any;
+					const inviteElem = document.createElement("invite-div") as inviteDiv;
 					inviteElem.username = invite.from;
 					inviteElem.inviteId = invite.inviteId;
 					inviteContainer.appendChild(inviteElem);
 				}
 			}
 		});
+	}
+
+	connectedCallback() {
+		this.root
+			.querySelector("app-navbar")!
+			.addEventListener("navigate-history", () => {
+				this.getGameHistory();
+			});
+
+		this.root
+			.querySelector("app-navbar")!
+			.addEventListener("navigate-lobby", () => {
+				const lobbyDash = this.root.querySelector(".flex-container");
+				lobbyDash?.replaceChildren();
+				const players = document.createElement("player-list");
+				const invites = document.createElement("invite-list");
+				lobbyDash?.appendChild(players);
+				lobbyDash?.appendChild(invites);
+			});
+	}
+
+	getGameHistory() {
+		const storageKey = "gameHistory";
+
+		const data: Record<string, GameHistoryItem[]> = JSON.parse(
+			localStorage.getItem(storageKey) ?? "{}",
+		);
+
+		const matchHistoryData = Object.values(data).flat();
+
+		const matchHistory = document.createElement("div");
+		matchHistory.classList.add("flex-container");
+		for (const match of matchHistoryData) {
+			const matchDiv = document.createElement("div");
+			matchDiv.classList.add("match");
+			const winner = document.createElement("h3");
+			winner.classList.add("winner");
+			if (match.winner === authStore.getUser()?.username) {
+				matchDiv.classList.add("win");
+				winner.innerText = "You";
+			} else {
+				matchDiv.classList.add("loss");
+				winner.innerText = match.winner;
+			}
+			const reason = document.createElement("p");
+			reason.innerText = "Reason: " + match.reason;
+			matchDiv.appendChild(winner);
+			matchDiv.appendChild(reason);
+			matchHistory.appendChild(matchDiv);
+		}
+		this.root.querySelector(".flex-container")?.replaceChildren(matchHistory);
 	}
 
 	disconnectedCallback() {
@@ -73,7 +125,6 @@ export class Dashboard extends HTMLElement {
 		const inviteContainer = this.root.querySelector("invite-list");
 		if (inviteContainer) inviteContainer.innerHTML = "";
 
-		this.localPlayers = [];
 		this.localInvites = [];
 	}
 }

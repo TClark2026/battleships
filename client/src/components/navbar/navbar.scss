@@ -11,7 +11,7 @@ div {
 	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-div a {
+div span {
 	text-decoration: none;
 	color: variables.$text;
 	font-weight: 600;
@@ -26,12 +26,13 @@ div a {
 		box-shadow 150ms ease;
 }
 
-div a:hover {
+div span:hover {
 	background: variables.$button_color;
 	transform: translateY(-1px);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	cursor: pointer;
 }
 
-div a:active {
+div span:active {
 	transform: translateY(0);
 }
