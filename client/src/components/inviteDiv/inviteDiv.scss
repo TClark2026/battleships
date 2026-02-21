@@ -2,36 +2,37 @@
 @use "../../styles/mixins";
 
 .invite-container {
-	flex-direction: column;
-	align-items: stretch;
-	gap: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .username {
-	flex: 1;
-	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 0.4rem;
 }
 
 .btn-container {
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .accept-invite,
 .decline-invite {
-	flex-shrink: 1;
-	padding: 0.4rem 0.8rem;
-	white-space: nowrap;
-	cursor: p;
+  flex-shrink: 1;
+  padding: 0.4rem 0.8rem;
+  white-space: nowrap;
+  cursor: p;
 }
 
 .accept-invite {
-	@include mixins.accept-button;
+  @include mixins.accept-button;
 }
 
 .decline-invite {
-	@include mixins.decline-button;
+  @include mixins.decline-button;
 }

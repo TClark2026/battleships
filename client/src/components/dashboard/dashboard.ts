@@ -121,7 +121,7 @@ export class Dashboard extends HTMLElement {
     const matchHistoryData = Object.values(data).flat();
 
     const matchHistory = document.createElement("div");
-    matchHistory.classList.add("flex-container");
+    matchHistory.classList.add("flex-container", "match-history");
 
     if (matchHistoryData.length === 0) {
       const emptyHeading = document.createElement("h2");
@@ -132,21 +132,34 @@ export class Dashboard extends HTMLElement {
         const matchDiv = document.createElement("div");
         matchDiv.classList.add("match");
 
-        const winner = document.createElement("h3");
-        winner.classList.add("winner");
+        const header = document.createElement("div");
+        header.classList.add("match__header");
 
-        if (match.winner === authStore.getUser()?.username) {
-          matchDiv.classList.add("win");
+        const winner = document.createElement("h3");
+        winner.classList.add("match__winner");
+
+        const badge = document.createElement("span");
+        badge.classList.add("match__badge");
+
+        const isWin = match.winner === authStore.getUser()?.username;
+        if (isWin) {
+          matchDiv.classList.add("match--win");
           winner.innerText = "You";
+          badge.innerText = "WIN";
         } else {
-          matchDiv.classList.add("loss");
+          matchDiv.classList.add("match--loss");
           winner.innerText = match.winner;
+          badge.innerText = "LOSS";
         }
 
         const reason = document.createElement("p");
-        reason.innerText = "Reason: " + match.reason;
+        reason.classList.add("match__reason");
+        reason.innerText = match.reason;
 
-        matchDiv.appendChild(winner);
+        header.appendChild(winner);
+        header.appendChild(badge);
+
+        matchDiv.appendChild(header);
         matchDiv.appendChild(reason);
         matchHistory.appendChild(matchDiv);
       }

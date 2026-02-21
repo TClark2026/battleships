@@ -2,11 +2,13 @@
 @use "../../styles/mixins";
 
 .player-container {
-	flex-direction: column;
-	align-items: stretch;
-	gap: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+  font-weight: bold;
 }
 
 .send-invite {
-	@include mixins.accept-button;
+  @include mixins.accept-button;
 }
