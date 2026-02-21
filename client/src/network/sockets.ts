@@ -10,7 +10,8 @@ import {
 	showWarnToast,
 } from "../utils/toast";
 
-const socket = new WebSocket("ws://localhost:3000");
+const HOST_NAME = "battleship-server-latest.onrender.com";
+const socket = new WebSocket(`ws://${HOST_NAME}`);
 let resuming = false;
 
 socket.addEventListener("open", () => {
