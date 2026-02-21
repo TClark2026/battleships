@@ -10,8 +10,10 @@ import {
 	showWarnToast,
 } from "../utils/toast";
 
-const HOST_NAME = "battleship-server-latest.onrender.com";
-const socket = new WebSocket(`wss://${HOST_NAME}`);
+const HOST_NAME = import.meta.env.PROD
+  ? "wss://battleship-server-latest.onrender.com"
+  : "ws://localhost:3000";
+const socket = new WebSocket(HOST_NAME);
 let resuming = false;
 
 socket.addEventListener("open", () => {
