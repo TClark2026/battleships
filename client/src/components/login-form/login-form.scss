@@ -1,32 +1,41 @@
 @use "../../styles/variables";
 @use "../../styles/mixins";
+
 .form-container {
-	width: min(300px, 50dvw);
-	flex: 1 1 auto;
-	padding: 1rem;
-	border-radius: 1rem;
+  width: min(300px, 50dvw);
+  flex: 1 1 auto;
+  padding: 1rem;
+  border-radius: 1rem;
 }
 
 form {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
 }
 
 .button-container {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	padding: 1rem;
-	gap: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 1rem;
+  gap: 1rem;
 
-	@media screen and (max-width: 800px) {
-		flex-direction: column;
-	}
+  @media screen and (max-width: 800px) {
+    flex-direction: column;
+  }
 }
 
 button {
-	@include mixins.accept-button;
+  @include mixins.accept-button;
+}
+
+label {
+  cursor: text;
+}
+
+.error {
+  min-height: 1.2em;
 }
