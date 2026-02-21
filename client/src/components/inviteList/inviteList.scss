@@ -1,0 +1,7 @@
+@use "../../styles/mixins";
+@use "../../styles/variables";
+
+.invite-list-container {
+	display: flex;
+	flex-direction: column;
+}

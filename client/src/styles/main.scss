@@ -1,0 +1,15 @@
+@use "./variables";
+
+body {
+	margin: 0;
+	font-family: system-ui, sans-serif;
+	background: variables.$bg;
+	color: variables.$text;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+h1 {
+	padding: 1rem;
+}
