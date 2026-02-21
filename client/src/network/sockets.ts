@@ -11,7 +11,7 @@ import {
 } from "../utils/toast";
 
 const HOST_NAME = "battleship-server-latest.onrender.com";
-const socket = new WebSocket(`ws://${HOST_NAME}`);
+const socket = new WebSocket(`wss://${HOST_NAME}`);
 let resuming = false;
 
 socket.addEventListener("open", () => {
