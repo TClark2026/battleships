@@ -1,63 +1,62 @@
 @use "./variables";
-@mixin select-button(
-	$bg: variables.$button_color,
-	$outline: variables.$outline
-) {
-	display: flex;
-	min-width: 5rem;
-	max-width: 20rem;
-	max-height: 2rem;
-	padding: 1rem;
-	justify-content: center;
-	align-items: center;
-	cursor: pointer;
-	&:hover {
-		outline: 1px inset $outline;
-	}
+@mixin select-button() {
+  background-color: variables.$button_color;
+  text-align: center;
+  flex: 1;
+  min-width: 10rem;
+  max-width: 20rem;
+  padding: 3rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  border: 1px solid variables.$outline;
+  &:hover {
+    cursor: pointer;
+    outline: 1px inset variables.$outline;
+  }
 }
 
 @mixin flex-container() {
-	display: flex;
-	flex-direction: row;
-	gap: 1rem;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
 
-	@media screen and (max-width: 800px) {
-		flex-direction: column;
-	}
+  @media screen and (max-width: 800px) {
+    flex-direction: column;
+  }
 }
 
 @mixin action-button {
-	padding: 0.75rem 1.25rem;
-	font-weight: 600;
-	text-align: center;
-	cursor: pointer;
-	border: none;
-	border-radius: 0.2rem;
-	transition:
-		transform 120ms ease,
-		opacity 120ms ease,
-		box-shadow 120ms ease;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.2rem;
+  transition:
+    transform 120ms ease,
+    opacity 120ms ease,
+    box-shadow 120ms ease;
 
-	&:hover {
-		opacity: 0.9;
-		transform: translateY(-2px);
-		box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-	}
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  }
 
-	&:active {
-		transform: translateY(0);
-		box-shadow: none;
-	}
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
 }
 
 @mixin accept-button {
-	@include action-button;
-	background-color: variables.$button_color;
-	color: #000000;
+  @include action-button;
+  background-color: variables.$button_color;
+  color: #000000;
 }
 
 @mixin decline-button {
-	@include action-button;
-	background-color: variables.$targeting_color;
-	color: #ffffff;
+  @include action-button;
+  background-color: variables.$targeting_color;
+  color: #ffffff;
 }

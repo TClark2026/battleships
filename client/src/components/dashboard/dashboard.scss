@@ -1,32 +1,42 @@
 @use "../../styles/mixins";
 
 .flex-container {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	text-align: center;
-	width: min(100%, 80rem);
-	margin-inline: auto;
-	gap: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: min(100%, 80rem);
+  margin-inline: auto;
+  gap: 2rem;
 }
 
 .win {
-	background-color: lightblue;
+  background-color: lightblue;
 }
 
 .loss {
-	background-color: orangered;
+  background-color: orangered;
 }
 
 .winner {
-	width: 5rem;
+  width: 5rem;
 }
 .match {
-	display: flex;
-	text-align: center;
-	align-items: center;
-	gap: 2rem;
-	padding: 2rem;
-	min-width: 20rem;
-	max-height: 4rem;
+  display: flex;
+  text-align: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  min-width: 20rem;
+  max-height: 4rem;
+}
+
+.select-button {
+  @include mixins.select-button;
+}
+
+.logout-button {
+  @include mixins.accept-button;
+  max-width: 10rem;
 }

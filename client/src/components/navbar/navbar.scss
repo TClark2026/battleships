@@ -1,38 +1,38 @@
 @use "../../styles/variables";
 
 div {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 1rem;
-
-	padding: 1rem 0;
-	background: variables.$bg;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: variables.$bg;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 div span {
-	text-decoration: none;
-	color: variables.$text;
-	font-weight: 600;
-	font-size: 0.95rem;
+  text-decoration: none;
+  color: variables.$text;
+  font-weight: 600;
+  font-size: 0.95rem;
 
-	padding: 0.6rem 1.1rem;
-	border-radius: 999px;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
 
-	transition:
-		background-color 150ms ease,
-		transform 150ms ease,
-		box-shadow 150ms ease;
+  transition:
+    background-color 150ms ease,
+    transform 150ms ease,
+    box-shadow 150ms ease;
 }
 
 div span:hover {
-	background: variables.$button_color;
-	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-	cursor: pointer;
+  background: variables.$button_color;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
 }
 
 div span:active {
-	transform: translateY(0);
+  transform: translateY(0);
 }
