@@ -296,9 +296,9 @@ socket.addEventListener("message", (event) => {
 
     if (msg.type === "ship_sunk") {
         if (msg.player === authStore.getUser()?.username) {
-            showGameToast(`Your ${msg.shipType} was sunk`);
+            showWarnToast(`Your ${msg.shipType} was sunk`);
         } else {
-            showGameToast(`${msg.player}'s ${msg.shipType} was sunk`);
+            showInfoToast(`${msg.player}'s ${msg.shipType} was sunk`);
         }
         return;
     }
