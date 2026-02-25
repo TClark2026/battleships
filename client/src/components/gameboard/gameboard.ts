@@ -108,7 +108,7 @@ export class Gameboard extends HTMLElement {
 		<button class="forfeit-btn" type="button">Forfeit</button>  
 	   </div>
       </div>
-	   <p>Press (R) to rotate ships.</p>
+	   <p class="control-text">Press (R) to rotate ships.</p>
       <div class="boards">
         <div class="board friendly-board" part="friendly-board"></div>
         <div class="board enemy-board" part="enemy-board"></div>
