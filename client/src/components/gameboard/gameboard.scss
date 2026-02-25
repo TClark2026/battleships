@@ -146,7 +146,7 @@
 .controls.placement-done .selector,
 .controls.placement-done .reset-btn,
 .controls.placement-done .rotate-btn,
-.controls.placement-done .control-text {
+.controls.placement-done + .control-text {
     display: none;
 }
 

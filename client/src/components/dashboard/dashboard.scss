@@ -1,72 +1,72 @@
 @use "../../styles/mixins";
 @use "../../styles/variables";
 .flex-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: min(100%, 80rem);
-  margin-inline: auto;
-  gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: min(100%, 80rem);
+    margin-inline: auto;
+    gap: 2rem;
 }
 
 .match-history {
-  align-items: stretch;
+    align-items: stretch;
 }
 
 .match {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
 
-  width: 100%;
-  max-width: 40rem;
+    width: 90%;
+    max-width: 40rem;
 
-  padding: 1rem 1.25rem;
-  border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
 }
 
 .match--win {
-  background-color: variables.$win-bg;
+    background-color: variables.$win-bg;
 }
 
 .match--loss {
-  background-color: variables.$loss-bg;
+    background-color: variables.$loss-bg;
 }
 
 .match__header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
 
-  text-align: left;
-  min-width: 10rem;
+    text-align: left;
+    min-width: 10rem;
 }
 
 .match__winner {
-  margin: 0;
+    margin: 0;
 }
 
 .match__badge {
-  display: inline-block;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+    display: inline-block;
+    font-weight: 700;
+    letter-spacing: 0.04em;
 }
 
 .match__reason {
-  margin: 0;
-  text-align: right;
-  white-space: nowrap;
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
 }
 
 .select-button {
-  @include mixins.select-button;
+    @include mixins.select-button;
 }
 
 .logout-button {
-  @include mixins.accept-button;
-  max-width: 10rem;
+    @include mixins.accept-button;
+    max-width: 10rem;
 }
